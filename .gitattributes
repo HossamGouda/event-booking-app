@@ -1,0 +1,6 @@
+# Set default behavior to automatically normalize line endings
+* text=auto
+
+# Force LF line endings for specific files
+package-lock.json eol=lf
+package.json eol=lf
