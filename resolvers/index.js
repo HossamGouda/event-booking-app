@@ -1,7 +1,5 @@
 const resolvers = {
-  Query: {
-    greeting: () => "Hello world!",
-  },
+  Query: {},
 };
 
 module.exports = {resolvers};
