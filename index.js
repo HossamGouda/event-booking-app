@@ -5,6 +5,8 @@ const http = require("http");
 const {typeDefs} = require("./Schema");
 const {resolvers} = require("./resolvers");
 const mongoose = require("mongoose");
+const jwt = require("jsonwebtoken");
+const User = require("./models/user");
 require("dotenv").config();
 
 async function startApolloServer(typeDefs, resolvers) {
@@ -14,6 +16,14 @@ async function startApolloServer(typeDefs, resolvers) {
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({httpServer})],
+    context: async ({ req }) => {
+      const auth = req ? req.headers.authorization : null;
+      if (auth) {
+        const decodedToken = jwt.verify(auth.slice(4), process.env.JWT_SECRET);
+        const user = await User.findById(decodedToken.id);
+        return { user };
+      }
+    },
   });
   await server.start();
   server.applyMiddleware({app});
