@@ -16,13 +16,19 @@ async function startApolloServer(typeDefs, resolvers) {
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({httpServer})],
-    context: async ({ req }) => {
+    context: async ({req}) => {
       const auth = req ? req.headers.authorization : null;
-      if (auth) {
-        const decodedToken = jwt.verify(auth.slice(4), process.env.JWT_SECRET);
-        const user = await User.findById(decodedToken.id);
-        return { user };
+      if (auth && auth.startsWith("jwt ")) {
+        const token = auth.slice(4); // Remove "jwt " prefix
+        try {
+          const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+          const user = await User.findById(decodedToken.userId);
+          return {user};
+        } catch (error) {
+          console.error("Authentication error:", error);
+        }
       }
+      return {};
     },
   });
   await server.start();
